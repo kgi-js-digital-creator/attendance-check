@@ -246,7 +246,7 @@ function App() {
             </div>
             <div className="break-all whitespace-pre-wrap select-all">
               {window.location.origin}
-              /?team=○○班&amp;gas=https://script.google.com/...&amp;spreadsheet=https://docs.google.com/...
+              /attendance-check/?team=○○班&amp;gas=https://script.google.com/...&amp;spreadsheet=https://docs.google.com/...
             </div>
           </div>
         </div>

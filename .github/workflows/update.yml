@@ -1,0 +1,41 @@
+name: Build and Publish Github Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.13.0"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Vite project
+        run: npm run build
+      - name: Generate ISO 8601 timestamp
+        id: timestamp
+        run: echo "time=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+      - name: Deploy dist to publish branch
+        run: |
+          set -e
+          git config user.name "github-actions"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin publish || echo "Branch publish not found, will create it."
+          git checkout publish || git checkout --orphan publish
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          cp -r dist/* ./
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update: ${{ steps.timestamp.outputs.time }}"
+          git push origin HEAD:publish
